@@ -1,0 +1,39 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum TestMode {
+  SIMULATION
+  LIVE
+}
+
+model MCBModel {
+  id             String   @id @default(uuid())
+  manufacturer   String
+  modelName      String
+  ratedCurrentA  Float
+  curveType      String
+  poles          Int
+  ratedVoltageV  Int
+  active         Boolean  @default(true)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  testSessions   TestSession[]
+}
+
+model TestSession {
+  id            String    @id @default(uuid())
+  testCode      String    @unique
+  mcbModelId    String
+  batchId       String?
+  serialNumber  String?
+  mode          TestMode  @default(SIMULATION)
+  status        String    @default("DRAFT")
+  createdAt     DateTime  @default(now())
+  mcbModel      MCBModel  @relation(fields: [mcbModelId], references: [id])
+}
